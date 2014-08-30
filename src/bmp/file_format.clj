@@ -26,9 +26,7 @@
     (assert (= (:compression header) 0) "Must be uncompressed")
     {:width (Math/abs (:width header))
      :height (Math/abs (:height header))
-     :horizontal-flip (> 0 (:width header))
-     :vertical-flip (> 0 (:height header))
-     :pixels (read-pixels buffer header)
+     :pixels (read-pixels header buffer)
      }))
 
 (defn write-file [filename bitmap]
@@ -43,8 +41,8 @@
     (.putInt buffer 0); reserved
     (.putInt buffer 54) ; offset
     (.putInt buffer 40) ; header length
-    (.putInt buffer (* (:width bitmap) (if (:horizontal-flip bitmap) -1 1)))
-    (.putInt buffer (* (:height bitmap) (if (:vertical-flip bitmap) -1 1)))
+    (.putInt buffer (:width bitmap))
+    (.putInt buffer (- (:height bitmap))) ; y is always top-to-bottom in our BMPs
     (.putShort buffer 1) ; planes
     (.putShort buffer 32) ; bits per pixel
     (.putInt buffer 0) ; no compression
@@ -53,20 +51,29 @@
     (.putInt buffer 2835) ; pixels per meter
     (.putLong buffer 0) ; important colors
     (.put buffer (byte-array (apply concat (apply concat (:pixels bitmap)))))
-    (.close file)
-    ))
+    (.close file)))
 
 (defn ->unsigned [byte]
   (if (>= byte 0)
     byte
     (bit-and 0xff (short byte))))
 
-(defn read-pixels [buffer header]
+(declare flip-pixels)
+
+(defn read-pixels [header buffer]
   (let [abs-height (Math/abs (:height header))
         abs-width (Math/abs (:width header))
         byte-size (* abs-width abs-height 4)
-        bytes (byte-array byte-size)]
-    (.position buffer (:offset header))
-    (.get buffer bytes)
-    (partition abs-width (partition 4 (map ->unsigned bytes)))))
+        bytes (byte-array byte-size)
+        _ (.position buffer (:offset header))
+        _ (.get buffer bytes)
+        unflipped-pixels (partition abs-width (partition 4 (map ->unsigned bytes)))]
+    (flip-pixels header unflipped-pixels)))
+
+(defn flip-pixels
+  "Internal representation of BMPs is ALWAYS top-to-bottom, left-to-right"
+  [header unflipped-pixels]
+  (let [x-flipped-pixels (if (> (:width header) 0) unflipped-pixels (map reverse unflipped-pixels))
+        xy-flipped-pixels (if (< (:height header) 0) x-flipped-pixels (reverse x-flipped-pixels))]
+    xy-flipped-pixels))
 
