@@ -27,12 +27,12 @@
     :parse-fn #(Integer. %)]
    ["-f" "--fill X1,Y1,X2,Y2,R,G,B" "Fill rectangle with a color"
     :parse-fn (fn [param] (map #(Integer. %) (str/split param #",")))]
-   ["-c" "--color-balance R,G,B"
+   ["-c" "--color-balance R,G,B" "Adjust color balance by fractional coefficients"
     :parse-fn (fn [param] (map #(Float. %) (str/split param #",")))]
-   ["-b" "--brightness Br"
+   ["-b" "--brightness Br" "Adjust brightness"
     :parse-fn #(Float. %)]
-   ["-n" "--negative"]
-   ["-m" "--monochrome"]])
+   ["-n" "--negative" "Produce a negative of the image"]
+   ["-m" "--monochrome" "Produce a monochrome version of the image"]])
 
 (def transforms {:scale #(resample %1 %2)
                  :translate #(translate %1 %2)

@@ -13,4 +13,7 @@ Intended for learning rather than production use.
       --mirror-y                Mirror image vertically
   -r, --rotate A                Rotate image by A degrees; A must be a multiple of 90
   -f, --fill X1,Y1,X2,Y2,R,G,B  Fill rectangle with a color
-```
+  -c, --color-balance R,G,B     Adjust color balance by fractional coefficients
+  -b, --brightness Br           Adjust brightness
+  -n, --negative                Produce a negative of the image
+  -m, --monochrome              Produce a monochrome version of the image```
