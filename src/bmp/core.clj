@@ -20,15 +20,14 @@
    ["-r" "--rotate A" "Rotate image by A degrees; A must be a multiple of 90"
     :parse-fn #(Integer. %)]
    ["-f" "--fill X1,Y1,X2,Y2,R,G,B" "Fill rectangle with a color"
-    :parse-fn (fn [param] (map #(Integer. %) (str/split param #",")))
-    :validate [#(and (> (nth % 0) 0) (> (nth % 1) 0)) "Width and height must be positive"]]])
+    :parse-fn (fn [param] (map #(Integer. %) (str/split param #",")))]])
 
 (def transforms {:scale #(resample %1 %2)
                  :translate #(translate %1 %2)
                  :mirror-x #(mirror-x %2)
                  :mirror-y #(mirror-y %2)
                  :rotate #(rotate %1 %2)
-                 :fill (fn [[x1 y1 x2 y2 r g b] bitmap] fill-rectangle [r g b 255] [x1 y1 x2 y2] bitmap)})
+                 :fill (fn [[x1 y1 x2 y2 r g b] bitmap] (fill-rectangle [b g r 255] [x1 y1 x2 y2] bitmap))})
 
 
 (defn process-file [options]
