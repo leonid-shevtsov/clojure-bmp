@@ -1,8 +1,10 @@
-(ns bmp.file-format)
+(ns bmp.file-format
+  (:use bmp.mirror)
+  )
 
 (def bmp-signature 0x4D42)
 
-(declare read-pixels)
+(declare read-pixels fix-bitmap-orientation)
 
 (defn read-file [filename]
   (let [file (java.io.RandomAccessFile. filename "r")
@@ -24,10 +26,10 @@
     (assert (= (:plane-count header) 1) "Must have 1 color plane")
     (assert (= (:colors header) 32) "Must have 32 bits per color")
     (assert (= (:compression header) 0) "Must be uncompressed")
-    {:width (Math/abs (:width header))
-     :height (Math/abs (:height header))
-     :pixels (read-pixels header buffer)
-     }))
+    (fix-bitmap-orientation header {:width (Math/abs (:width header))
+                                    :height (Math/abs (:height header))
+                                    :pixels (read-pixels header buffer)
+                                    })))
 
 (defn write-file [filename bitmap]
   (let [bitmap-size (* (:width bitmap) (:height bitmap) 4)
@@ -58,22 +60,18 @@
     byte
     (bit-and 0xff (short byte))))
 
-(declare flip-pixels)
-
 (defn read-pixels [header buffer]
   (let [abs-height (Math/abs (:height header))
         abs-width (Math/abs (:width header))
         byte-size (* abs-width abs-height 4)
-        bytes (byte-array byte-size)
-        _ (.position buffer (:offset header))
-        _ (.get buffer bytes)
-        unflipped-pixels (partition abs-width (partition 4 (map ->unsigned bytes)))]
-    (flip-pixels header unflipped-pixels)))
+        bytes (byte-array byte-size)]
+    (.position buffer (:offset header))
+    (.get buffer bytes)
+    (partition abs-width (partition 4 (map ->unsigned bytes)))))
 
-(defn flip-pixels
+(defn fix-bitmap-orientation
   "Internal representation of BMPs is ALWAYS top-to-bottom, left-to-right"
-  [header unflipped-pixels]
-  (let [x-flipped-pixels (if (> (:width header) 0) unflipped-pixels (map reverse unflipped-pixels))
-        xy-flipped-pixels (if (< (:height header) 0) x-flipped-pixels (reverse x-flipped-pixels))]
-    xy-flipped-pixels))
-
+  [header unflipped-bitmap]
+  (let [x-flipped-bitmap (if (> (:width header) 0) unflipped-bitmap (mirror-x unflipped-bitmap))
+        xy-flipped-bitmap (if (< (:height header) 0) x-flipped-bitmap (mirror-y x-flipped-bitmap))]
+    xy-flipped-bitmap))

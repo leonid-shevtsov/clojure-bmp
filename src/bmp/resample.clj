@@ -1,5 +1,4 @@
-(ns bmp.resample
-  )
+(ns bmp.resample)
 
 (declare horizontal-resample vertical-resample)
 
