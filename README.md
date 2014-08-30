@@ -16,4 +16,5 @@ Intended for learning rather than production use.
   -c, --color-balance R,G,B     Adjust color balance by fractional coefficients
   -b, --brightness Br           Adjust brightness
   -n, --negative                Produce a negative of the image
-  -m, --monochrome              Produce a monochrome version of the image```
+  -m, --monochrome              Produce a monochrome version of the image
+  ```
