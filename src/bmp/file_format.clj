@@ -53,6 +53,7 @@
     (.putInt buffer 2835) ; pixels per meter
     (.putLong buffer 0) ; important colors
     (.put buffer (byte-array (apply concat (apply concat (:pixels bitmap)))))
+    (.setLength file filesize)
     (.close file)))
 
 (defn ->unsigned [byte]
