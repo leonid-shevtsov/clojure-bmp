@@ -1,5 +1,11 @@
 (ns bmp.core
-  (:use bmp.file-format bmp.resample bmp.rotate bmp.translate bmp.mirror bmp.rectangle)
+  (:use bmp.file-format
+        bmp.resample
+        bmp.rotate
+        bmp.translate
+        bmp.mirror
+        bmp.rectangle
+        bmp.color)
   (:require [clojure.tools.cli :refer [parse-opts]] [clojure.string :as str])
   (:gen-class))
 
@@ -20,14 +26,24 @@
    ["-r" "--rotate A" "Rotate image by A degrees; A must be a multiple of 90"
     :parse-fn #(Integer. %)]
    ["-f" "--fill X1,Y1,X2,Y2,R,G,B" "Fill rectangle with a color"
-    :parse-fn (fn [param] (map #(Integer. %) (str/split param #",")))]])
+    :parse-fn (fn [param] (map #(Integer. %) (str/split param #",")))]
+   ["-c" "--color-balance R,G,B"
+    :parse-fn (fn [param] (map #(Float. %) (str/split param #",")))]
+   ["-b" "--brightness Br"
+    :parse-fn #(Float. %)]
+   ["-n" "--negative"]
+   ["-m" "--monochrome"]])
 
 (def transforms {:scale #(resample %1 %2)
                  :translate #(translate %1 %2)
                  :mirror-x #(mirror-x %2)
                  :mirror-y #(mirror-y %2)
                  :rotate #(rotate %1 %2)
-                 :fill (fn [[x1 y1 x2 y2 r g b] bitmap] (fill-rectangle [b g r 255] [x1 y1 x2 y2] bitmap))})
+                 :fill (fn [[x1 y1 x2 y2 r g b] bitmap] (fill-rectangle [b g r 255] [x1 y1 x2 y2] bitmap))
+                 :color-balance #(adjust-color-balance %1 %2)
+                 :brightness #(adjust-brightness %1 %2)
+                 :negative #(negative %2)
+                 :monochrome #(monochrome %2)})
 
 
 (defn process-file [options]
@@ -37,9 +53,7 @@
                                       %1)
                                    bitmap
                                    transforms)]
-    (write-file (:out options) transformed-bitmap)
-    )
-  )
+    (write-file (:out options) transformed-bitmap)))
 
 (defn -main
   [& args]
@@ -48,6 +62,5 @@
       (if (:errors options)
         (do (println (:errors options)) (System/exit 1))
         (process-file (:options options)))
-      (do (println "In and out files are required") (println (:summary options)) (System/exit 1))
-      )))
+      (do (println "In and out files are required") (println (:summary options)) (System/exit 1)))))
 
