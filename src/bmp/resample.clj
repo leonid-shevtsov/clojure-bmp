@@ -2,7 +2,9 @@
 
 (declare horizontal-resample vertical-resample)
 
-(defn resample [[new-width new-height] bitmap]
+(defn resample
+  "Smoothly resizes bitmap to a new size"
+  [[new-width new-height] bitmap]
   (-> bitmap
       ((partial horizontal-resample new-width))
       ((partial vertical-resample new-height))))

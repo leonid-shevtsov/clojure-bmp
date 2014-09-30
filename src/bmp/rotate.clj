@@ -15,7 +15,9 @@
 
 (def rotator-fn-map {0 identity 90 rotate-90 180 rotate-180 270 rotate-270})
 
-(defn rotate [angle bitmap]
+(defn rotate
+  "Rotate bitmap by a multiple of 90 degrees, clockwise or counterclockwise"
+  [angle bitmap]
   (let [rotator-fn (rotator-fn-map (mod angle 360))]
     (assert (some? rotator-fn) "Angle must be multiple of 90")
     (rotator-fn bitmap)))

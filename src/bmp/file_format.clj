@@ -6,7 +6,10 @@
 
 (declare read-pixels fix-bitmap-orientation)
 
-(defn read-file [filename]
+(defn read-file
+  "Reads bitmap from BMP file. BMP file MUST be recent, true-color, uncompressed.
+   Raises exception if something doesn't match"
+  [filename]
   (let [file (java.io.RandomAccessFile. filename "r")
         channel (.getChannel file)
         buffer (.map channel java.nio.channels.FileChannel$MapMode/READ_ONLY, 0, (.size channel))
@@ -31,7 +34,9 @@
                                     :pixels (read-pixels header buffer)
                                     })))
 
-(defn write-file [filename bitmap]
+(defn write-file
+  "Writes a bitmap into a BMP file"
+  [filename bitmap]
   (let [bitmap-size (* (:width bitmap) (:height bitmap) 4)
         filesize (+ bitmap-size 54)
         file (java.io.RandomAccessFile. filename "rw")

@@ -9,6 +9,8 @@
   (:require [clojure.tools.cli :refer [parse-opts]] [clojure.string :as str])
   (:gen-class))
 
+; Command-line client for entire suite of functions
+
 (def cli-options
   ;; An option with a required argument
   [["-i" "--in filename.bmp" "Input file (required)"
